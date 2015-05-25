@@ -112,6 +112,16 @@ class OXEmailSync
       $message["flags"] = $mail[1];
       # $message["mod"] = $this -> OXUtils -> timestampOXtoPHP($mail[2]);
       $message["mod"] = 0;
+      
+      /* FIXES UNREAD ISSUE */
+      
+    if(floor($mail["unread"]) == 1){
+		    $message["flags"] = 0;
+	  }else{
+			  $message["flags"] = 1;
+	   }
+      
+      
       $messages[] = $message;
 
       // respect the cutoffdate
@@ -241,7 +251,17 @@ class OXEmailSync
 
     // Though the unseen key is not in data we can assume the messages returned are in fact unseen
     // because of the "unseen" => true parameter to OX API (?)
-    $output -> read = array_key_exists("unseen", $response["data"]) && $response["data"]["unseen"] == "true" ? false : false;
+  //  $output -> read = array_key_exists("unseen", $response["data"]) && $response["data"]["unseen"] == "true" ? false : false;
+   
+   /* FIXES UNREAD ISSUE */ 
+  if($response["data"]["unread"]  == "1"){
+		$output -> read = 0;
+	}else{
+		$output -> read = 1;
+	
+	}
+   
+   
     $output -> datereceived = $this -> OXUtils -> timestampOXtoPHP($response["data"]["received_date"]);
 
     foreach ($response["data"]["attachments"] as $attachment) {
